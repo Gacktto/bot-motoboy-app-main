@@ -12,12 +12,15 @@ import { CircleAlert, QrCode, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { useState } from "react";
 import { revalidateTag } from "next/cache";
 
+import { useGetQrCode } from "@/hooks/useGetQrCode";
+
 type BotQrCodeGenerate = {
   qrCode: string;
 };
 
 export function Connector() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { QRCODE, isLoading, isError } = useGetQrCode();
+  const [isLoadings, setIsLoading] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [qrCodeImageSrc, setQrCodeImageSrc] = useState(
     "/placeholder.svg?height=200&width=200"
@@ -30,22 +33,19 @@ export function Connector() {
 
   const { toast } = useToast();
 
+  const generateQrCode2 = () => {
+    if (QRCODE?.qrCode) {
+      return QRCODE.qrCode;
+    }
+  };
+
   const generateQrCode = async () => {
     setIsLoading(true);
     setConnectionStatus("connecting");
     setShowQrCode(true);
 
     try {
-      const { qrCode } = await apiFetch<BotQrCodeGenerate>(
-        "/bot-conection/qrcode",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      setQrCodeImageSrc(qrCode);
+      setQrCodeImageSrc(generateQrCode2);
     } catch (error) {
       toast({
         title: "Erro ao gerar QR Code",
@@ -56,6 +56,8 @@ export function Connector() {
     } finally {
       setIsLoading(false);
     }
+
+    
 
     // Simulate QR code generation
     setTimeout(() => {
@@ -104,7 +106,7 @@ export function Connector() {
           {!botConnection.isConnected && (
             <Button
               onClick={generateQrCode}
-              disabled={isLoading || connectionStatus === "connecting"}
+              disabled={isLoadings || connectionStatus === "connecting"}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               {connectionStatus === "connecting" ? (
@@ -175,7 +177,7 @@ export function Connector() {
                   variant="outline"
                   size="sm"
                   onClick={generateQrCode}
-                  disabled={isLoading || connectionStatus === "connecting"}
+                  disabled={isLoadings || connectionStatus === "connecting"}
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Atualizar QR Code
