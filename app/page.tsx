@@ -14,7 +14,9 @@ export default function Home() {
     const checkAuth = async () => {
       const authData = cookieUtils.getAuthData();
       if (authData?.token) {
+        console.log(authData);
         setIsAuthenticated(true);
+        console.log(authData);
       }
       setIsLoading(false);
     };
