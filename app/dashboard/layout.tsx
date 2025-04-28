@@ -86,20 +86,7 @@ export default function DashboardLayout({
   const isMobile = useMobile();
   const router = useRouter();
   useBotConnectionSync();
-
-  useEffect(() => {
-    if (!isLoading && (!user || isError)) {
-      router.push("/");
-    }
-  }, [isLoading, user, isError, router]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Carregando...</p>
-      </div>
-    );
-  }
+  
 
   const closeSidebar = () => {
     setSidebarOpen(false);

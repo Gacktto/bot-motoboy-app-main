@@ -13,7 +13,6 @@ const baseURL = process.env.NEXT_PUBLIC_API_URL;
  * @returns A promise resolving to the parsed JSON response of type T
  * @throws {Error} If the API request fails
  */
-
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -37,15 +36,20 @@ export async function apiFetch<T>(
     ...options,
     headers,
     next: nextOptions,
-    credentials: "include",  // Adiciona essa linha para garantir que os cookies sejam enviados
+    credentials: "include", // Important for cookies
   });
 
-  console.log(res);
+  let data: any;
 
-  if (!res.ok) {
-    throw new Error(`Erro na requisição: ${res.statusText}`);
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new Error("Resposta inválida da API.");
   }
 
-  return res.json();
-}
+  if (!res.ok) {
+    throw new Error(data?.message || `Erro na requisição: ${res.statusText}`);
+  }
 
+  return data as T;
+}
