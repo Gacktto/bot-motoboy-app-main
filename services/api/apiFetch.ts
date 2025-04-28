@@ -13,6 +13,7 @@ const baseURL = process.env.NEXT_PUBLIC_API_URL;
  * @returns A promise resolving to the parsed JSON response of type T
  * @throws {Error} If the API request fails
  */
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -36,6 +37,7 @@ export async function apiFetch<T>(
     ...options,
     headers,
     next: nextOptions,
+    credentials: "include",  // Adiciona essa linha para garantir que os cookies sejam enviados
   });
 
   console.log(res);
@@ -46,3 +48,4 @@ export async function apiFetch<T>(
 
   return res.json();
 }
+
