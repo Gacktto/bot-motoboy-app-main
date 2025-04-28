@@ -6,6 +6,7 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,  // Adiciona esta linha para garantir que os cookies sejam enviados
 });
 
 apiClient.interceptors.request.use((config) => {
