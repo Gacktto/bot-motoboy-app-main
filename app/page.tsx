@@ -4,29 +4,30 @@ import { redirect } from "next/navigation"
 import { useState, useEffect } from "react"
 import LoginForm from "@/components/login-form"
 import LoadingScreen from "@/components/loading-screen"
+import { cookieUtils } from "@/lib/utils/cookies"
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
-
-  // In a real app, you would check if the user is authenticated
-  // For demo purposes, we'll just show the login form
-  const isAuthenticated = false
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1500)
+    const checkAuth = async () => {
+      const authData = cookieUtils.getAuthData();
+      if (authData?.token) {
+        setIsAuthenticated(true);
+      }
+      setIsLoading(false);
+    };
 
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (isAuthenticated) {
-    redirect("/dashboard")
-  }
+    checkAuth();
+  }, []);
 
   if (isLoading) {
     return <LoadingScreen />
+  }
+
+  if (isAuthenticated) {
+    redirect("/dashboard");
   }
 
   return (
@@ -41,4 +42,3 @@ export default function Home() {
     </div>
   )
 }
-
