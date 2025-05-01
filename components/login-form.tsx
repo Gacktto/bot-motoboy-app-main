@@ -44,42 +44,54 @@ export default function LoginForm() {
   const { toast } = useToast();
   const { formatPhoneNumber } = useMasks();
 
-  const onSubmit = async (values: LoginFormValues) => {
-    setIsLoading(true);
-    console.log(values);
+  // Trecho do onSubmit atualizado
+const onSubmit = async (values: LoginFormValues) => {
+  setIsLoading(true);
+  try {
+    // 1. Buscar CSRF token
+    const csrfRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, {
+      credentials: "include", // importante para trazer o cookie csrf_secret
+    });
 
-    try {
-      const response = await apiFetch<AuthResponse>("/login", {
-        method: "POST",
-        body: JSON.stringify(values),
+    const { csrfToken } = await csrfRes.json();
+
+    // 2. Enviar dados de login + csrfToken no header
+    const response = await apiFetch<AuthResponse>("/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "csrf-token": csrfToken, // Header esperado pelo backend
+      },
+      body: JSON.stringify(values),
+    });
+
+    if (response.token && response.userId) {
+      cookieUtils.setAuthData({
+        token: response.token,
+        userId: response.userId,
       });
-
-      if (response.token && response.userId) {
-        cookieUtils.setAuthData({
-          token: response.token,
-          userId: response.userId,
-        });
-        router.push("/dashboard");
-      } else {
-        toast({
-          title: "Erro ao fazer login",
-          description: "Ocorreu um erro ao fazer login",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      router.push("/dashboard");
+    } else {
       toast({
         title: "Erro ao fazer login",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Ocorreu um erro ao fazer login",
+        description: "Ocorreu um erro ao fazer login",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (error) {
+    toast({
+      title: "Erro ao fazer login",
+      description:
+        error instanceof Error
+          ? error.message
+          : "Ocorreu um erro ao fazer login",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <motion.div

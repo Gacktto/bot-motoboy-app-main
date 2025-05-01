@@ -145,7 +145,7 @@ export default function ContatosPage() {
           }]);
           addForm.reset();
         },
-        onError: () => {
+        onError: (error) => {
           console.log('Erro ao criar contato.');
         }
       }
